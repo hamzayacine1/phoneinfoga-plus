@@ -1,0 +1,764 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<<<<<<< HEAD
+=======
+<meta name="theme-color" content="#0b1020">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
+>>>>>>> 407da16 (🚀 v2 : batch, PWA, PDF/JSON, thème, enrichissement, gardien anti-sommeil)
+<title>PhoneInfoga+ — OSINT numéros de téléphone</title>
+<style>
+:root{
+  --bg:#0b1020;--card:#151b31;--card2:#1c2440;--line:#2a3355;
+  --txt:#e8ecf8;--mut:#93a0c4;--acc:#5b8cff;--ok:#2ecc71;--ko:#ff5c7a;
+  --warn:#ffb020;--mono:ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--txt);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh}
+.wrap{max-width:640px;margin:0 auto;padding:14px 14px 90px}
+header{display:flex;align-items:center;gap:10px;padding:8px 2px 14px}
+.logo{width:40px;height:40px;border-radius:11px;background:linear-gradient(135deg,#5b8cff,#7c4dff);display:flex;align-items:center;justify-content:center;font-size:20px;flex:0 0 auto}
+header h1{font-size:19px;letter-spacing:.3px}
+header small{color:var(--mut);display:block;font-size:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:14px}
+label{display:block;font-size:12px;color:var(--mut);margin:0 0 6px;font-weight:600;text-transform:uppercase;letter-spacing:.6px}
+.inp{width:100%;background:var(--card2);border:1px solid var(--line);color:var(--txt);border-radius:12px;padding:13px 14px;font-size:17px;outline:none}
+.inp:focus{border-color:var(--acc)}
+.row{display:flex;gap:10px}
+.row .grow{flex:1}
+select.inp{font-size:15px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:none;border-radius:12px;padding:13px 16px;font-size:16px;font-weight:700;cursor:pointer;text-decoration:none;color:#fff;background:linear-gradient(135deg,#5b8cff,#7c4dff);width:100%;transition:opacity .15s}
+.btn:active{opacity:.8}
+.btn.ghost{background:var(--card2);border:1px solid var(--line);font-weight:600}
+.btn.small{width:auto;padding:8px 12px;font-size:13px;border-radius:9px}
+.btn[disabled]{opacity:.5;pointer-events:none}
+.spin{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.sec{margin-bottom:14px}
+.sec>.h{display:flex;align-items:center;gap:8px;padding:11px 13px;background:var(--card2);border:1px solid var(--line);border-radius:12px 12px 0 0;cursor:pointer;user-select:none}
+.sec>.h .nm{font-weight:700;font-size:15px;flex:1}
+.sec>.h .st{font-size:11px;padding:3px 9px;border-radius:99px;font-weight:700}
+.st.ok{background:rgba(46,204,113,.15);color:var(--ok)}
+.st.no{background:rgba(92,160,255,.15);color:var(--acc)}
+.st.err{background:rgba(255,92,122,.15);color:var(--ko)}
+.st.run{background:rgba(255,176,32,.15);color:var(--warn)}
+.sec>.b{background:var(--card);border:1px solid var(--line);border-top:none;border-radius:0 0 12px 12px;padding:13px}
+.sec.closed>.b{display:none}
+.kv{display:grid;grid-template-columns:minmax(0,1fr);gap:7px;font-size:14.5px}
+.kv .it{display:flex;justify-content:space-between;gap:12px;padding:7px 10px;background:var(--card2);border-radius:9px}
+.kv .it b{text-align:right;word-break:break-word;color:var(--txt);font-weight:600}
+.kv .it span{color:var(--mut);font-size:13px}
+ul.links{list-style:none}
+ul.links li{padding:8px 4px;border-bottom:1px dashed var(--line);font-size:14.5px}
+ul.links li:last-child{border-bottom:none}
+ul.links a{color:var(--acc);text-decoration:none;word-break:break-all}
+ul.links .sub{color:var(--mut);font-size:12.5px;display:block;margin-top:2px}
+.dork{font-family:var(--mono);font-size:12px;background:var(--card2);padding:8px 10px;border-radius:8px;margin:6px 0;word-break:break-all;color:var(--txt)}
+.errbox{color:var(--ko);font-size:13.5px;background:rgba(255,92,122,.08);border:1px solid rgba(255,92,122,.3);padding:9px 11px;border-radius:9px}
+details.raw{margin-top:9px}
+details.raw summary{font-size:12px;color:var(--mut);cursor:pointer}
+details.raw pre{font-family:var(--mono);font-size:11px;background:#0d1226;border:1px solid var(--line);border-radius:8px;padding:9px;margin-top:6px;overflow:auto;max-height:260px;white-space:pre-wrap;word-break:break-all}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.grid2 a{background:var(--card2);border:1px solid var(--line);color:var(--txt);text-decoration:none;border-radius:10px;padding:10px;font-size:13.5px;font-weight:600;display:flex;align-items:center;gap:8px}
+.grid2 a span{flex:1}
+.grid2 a em{font-style:normal;font-size:16px}
+.statusline{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--mut);margin:10px 2px 0}
+#toast{position:fixed;left:50%;bottom:76px;transform:translateX(-50%);background:#1c2440;border:1px solid var(--acc);color:var(--txt);padding:9px 16px;border-radius:99px;font-size:13.5px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:50;max-width:88vw;text-align:center}
+#toast.on{opacity:1}
+.modal{position:fixed;inset:0;background:rgba(5,8,18,.78);display:none;z-index:40;overflow-y:auto}
+.modal.open{display:block}
+.modal .m{max-width:620px;margin:26px auto;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;position:relative}
+.modal h2{font-size:17px;margin-bottom:4px}
+.modal .cls{position:absolute;top:12px;right:14px;background:none;border:none;color:var(--mut);font-size:22px;cursor:pointer}
+.fld{margin-bottom:12px}
+.fld .inp{font-family:var(--mono);font-size:13.5px}
+.hint{font-size:12px;color:var(--mut);margin-top:4px}
+.hist{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.chip{background:var(--card2);border:1px solid var(--line);color:var(--txt);border-radius:99px;padding:6px 13px;font-size:13.5px;cursor:pointer}
+footer{text-align:center;color:var(--mut);font-size:11.5px;padding:18px 0 8px;line-height:1.7}
+footer b{color:var(--warn)}
+.num{font-family:var(--mono);font-size:22px;font-weight:800;color:#fff;text-align:center;padding:4px 0 2px}
+.subnum{text-align:center;color:var(--mut);font-size:12.5px;margin-bottom:10px}
+.badge{font-size:11px;background:rgba(124,77,255,.25);color:#c9b8ff;border:1px solid rgba(124,77,255,.5);padding:2px 8px;border-radius:99px;vertical-align:middle;margin-left:6px}
+<<<<<<< HEAD
+=======
+/* ---------- thème clair ---------- */
+body.light{--bg:#f2f5fb;--card:#ffffff;--card2:#edf1f9;--line:#d9dfee;--txt:#141a2e;--mut:#5b6884}
+body.light .num{color:#0b1020}
+body.light details.raw pre{background:#f5f7fc}
+/* ---------- impression / PDF ---------- */
+@media print{
+  body{background:#fff;color:#000}
+  .no-print,.grid2,.hist,.statusline,#quicklinks,header,footer,.modal,.errbox{display:none!important}
+  .sec>.b{display:block!important}
+  .sec{break-inside:avoid;border:1px solid #ccc;border-radius:8px;margin-bottom:10px}
+  .sec>.h{background:#eee;border:none}
+  .sec>.b{background:#fff;border:none}
+  .kv .it{background:#f4f4f4;color:#000}
+  details.raw pre{max-height:none;background:#fafafa;color:#000}
+}
+>>>>>>> 407da16 (🚀 v2 : batch, PWA, PDF/JSON, thème, enrichissement, gardien anti-sommeil)
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">📞</div>
+<<<<<<< HEAD
+    <div>
+      <h1>PhoneInfoga<sup><span class="badge">+</span></sup></h1>
+      <small>OSINT · numéros de téléphone</small>
+    </div>
+  </header>
+
+  <div class="card">
+=======
+    <div style="flex:1">
+      <h1>PhoneInfoga<sup><span class="badge">+</span></sup></h1>
+      <small>OSINT · numéros de téléphone</small>
+    </div>
+    <button class="btn small ghost" id="themeBtn" style="width:auto" title="Changer de thème">🌙</button>
+  </header>
+
+  <div class="card no-print">
+>>>>>>> 407da16 (🚀 v2 : batch, PWA, PDF/JSON, thème, enrichissement, gardien anti-sommeil)
+    <div class="row">
+      <div class="grow">
+        <label>Numéro</label>
+        <input id="num" class="inp" inputmode="tel" placeholder="+33612345678 ou 0612345678" value="">
+      </div>
+    </div>
+    <div style="height:10px"></div>
+    <div class="row">
+      <div style="flex:0 0 130px">
+        <label>Pays (si sans +)</label>
+        <select id="cc" class="inp">
+          <option value="33" selected>🇫🇷 +33</option>
+          <option value="32">🇧🇪 +32</option>
+          <option value="41">🇨🇭 +41</option>
+          <option value="212">🇲🇦 +212</option>
+          <option value="213">🇩🇿 +213</option>
+          <option value="216">🇹🇳 +216</option>
+          <option value="1">🇺🇸/🇨🇦 +1</option>
+          <option value="44">🇬🇧 +44</option>
+          <option value="49">🇩🇪 +49</option>
+          <option value="34">🇪🇸 +34</option>
+          <option value="39">🇮🇹 +39</option>
+          <option value="351">🇵🇹 +351</option>
+          <option value="31">🇳🇱 +31</option>
+          <option value="352">🇱🇺 +352</option>
+          <option value="90">🇹🇷 +90</option>
+        </select>
+      </div>
+      <div class="grow" style="display:flex;align-items:flex-end">
+        <button class="btn" id="go">🔍 Analyser le numéro</button>
+      </div>
+    </div>
+    <div class="statusline" id="status"></div>
+    <div class="hist" id="hist"></div>
+  </div>
+
+  <div class="grid2" id="quicklinks"></div>
+
+<<<<<<< HEAD
+=======
+  <div class="card no-print">
+    <button class="btn ghost" id="batchToggle" style="margin-bottom:8px">📚 Analyse en lot (plusieurs numéros)</button>
+    <div id="batchBox" style="display:none">
+      <label>Numéros (un par ligne, max 30)</label>
+      <textarea id="batchList" class="inp" rows="4" style="font-family:var(--mono);font-size:14px;resize:vertical" placeholder="0612345678
++213550123456
+0550 98 76 54"></textarea>
+      <div style="height:8px"></div>
+      <div class="row">
+        <div class="grow"><button class="btn" id="batchGo">🔍 Analyser le lot</button></div>
+        <div style="flex:0 0 110px"><button class="btn ghost" id="batchCsv" disabled>📊 CSV</button></div>
+      </div>
+      <div class="statusline" id="batchStatus"></div>
+      <div id="batchResults"></div>
+    </div>
+  </div>
+
+  <div class="card no-print" id="actionsBar" style="display:none">
+    <div class="grid2" style="grid-template-columns:1fr 1fr 1fr">
+      <button class="btn small ghost" onclick="printReport()">🖨️ PDF</button>
+      <button class="btn small ghost" onclick="exportJSON()">⬇️ JSON</button>
+      <button class="btn small ghost" onclick="toggleAll()">📂 Tous</button>
+    </div>
+  </div>
+
+>>>>>>> 407da16 (🚀 v2 : batch, PWA, PDF/JSON, thème, enrichissement, gardien anti-sommeil)
+  <div style="height:12px"></div>
+  <div id="results"></div>
+
+  <div style="height:6px"></div>
+<<<<<<< HEAD
+  <div class="card">
+=======
+  <div class="card no-print">
+>>>>>>> 407da16 (🚀 v2 : batch, PWA, PDF/JSON, thème, enrichissement, gardien anti-sommeil)
+    <button class="btn ghost" id="openSettings">⚙️ Scanners &amp; clés API</button>
+    <div class="hint" style="margin-top:8px">Truecaller, Eyecon, Twilio, Abstract, Numverify, Google CSE… tes clés restent dans ton navigateur (localStorage), elles ne sont jamais stockées sur le serveur.</div>
+  </div>
+
+  <footer>
+    <b>Usage légal uniquement.</b><br>
+    Analyse uniquement les numéros que tu es autorisé à vérifier.
+    Les intégrations Truecaller/Eyecon utilisent des API non officielles (risque de blocage de compte).<br>
+    Propulsé par PhoneInfoga v2.11.0 · interface étendue
+  </footer>
+</div>
+
+<div class="modal" id="settingsModal">
+  <div class="m">
+    <button class="cls" id="closeSettings">×</button>
+    <h2>⚙️ Clés API &amp; tokens</h2>
+    <div class="hint" style="margin-bottom:14px">Stockées uniquement dans ton navigateur. Un scanner sans clé n'est simplement pas exécuté.</div>
+
+    <div style="background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:13px;margin-bottom:16px">
+      <div style="font-weight:800;margin-bottom:9px">⚡ Remplissage automatique</div>
+
+      <div style="font-weight:700;font-size:13.5px;margin:8px 0 6px">🔵 Token Truecaller par SMS (sans extraction manuelle)</div>
+      <div class="row" style="margin-bottom:7px">
+        <div class="grow"><input id="tc_num" class="inp" inputmode="tel" placeholder="+33612345678 (ton numéro)"></div>
+        <div style="flex:0 0 118px"><button class="btn small" id="tc_send" style="width:100%;padding:12px 6px">📩 Envoyer</button></div>
+      </div>
+      <div class="row">
+        <div class="grow"><input id="tc_code" class="inp" inputmode="numeric" placeholder="Code reçu par SMS" disabled></div>
+        <div style="flex:0 0 118px"><button class="btn small" id="tc_ok" style="width:100%;padding:12px 6px" disabled>✅ Activer</button></div>
+      </div>
+      <div class="hint" id="tc_state">Truecaller t'envoie un SMS avec un code → l'app crée le token automatiquement et le remplit. ⚠️ Numéro jetable conseillé (risque de ban).</div>
+
+      <div style="font-weight:700;font-size:13.5px;margin:14px 0 6px">📋 Coller des en-têtes capturés (remplit tout d'un coup)</div>
+      <textarea id="paste_headers" class="inp" rows="4" style="font-family:var(--mono);font-size:12.5px;resize:vertical" placeholder="authorization: Bearer a2i9…
+e-auth: eyJ…
+e-auth-v: vc_312…
+e-auth-c: abc…
+account_sid: ACxxx
+auth_token: xxx"></textarea>
+      <button class="btn small" id="paste_go" style="margin-top:7px">🔁 Remplir automatiquement</button>
+      <div class="hint" id="paste_state"></div>
+
+      <div class="row" style="margin-top:12px">
+        <div style="flex:1"><button class="btn small ghost" id="keys_export" style="width:100%">📤 Exporter</button></div>
+        <div style="flex:1"><button class="btn small ghost" id="keys_import" style="width:100%">📥 Importer</button></div>
+      </div>
+      <div class="hint">Exporte/copie tes clés pour les transférer sur un autre appareil.</div>
+    </div>
+
+    <div class="fld"><label>Truecaller — token d'auth (obligatoire)</label>
+      <input id="s_tc" class="inp" placeholder="Bearer a2i9P--… ou a2i9P--…">
+      <div class="hint">Depuis l'app Truecaller (Android) : sauvegarde → extraire le token <i>authorization</i>, ou capture réseau. Risque de bannissement de ton compte — utilise un compte jetable.</div></div>
+
+    <div class="fld"><label>Eyecon — e-auth</label>
+      <input id="s_ea" class="inp" placeholder="e-auth (JWT…)"></div>
+    <div class="fld"><label>Eyecon — e-auth-v</label>
+      <input id="s_eav" class="inp" placeholder="e-auth-v"></div>
+    <div class="fld"><label>Eyecon — e-auth-c</label>
+      <input id="s_eac" class="inp" placeholder="e-auth-c">
+      <div class="hint">Depuis l'app Eyecon : capture réseau des en-têtes e-auth*. </div></div>
+
+    <div class="fld"><label>Twilio — Account SID</label>
+      <input id="s_ts" class="inp" placeholder="ACxxxxxxxx…"></div>
+    <div class="fld"><label>Twilio — Auth Token</label>
+      <input id="s_tt" class="inp" placeholder="••••••••">
+      <div class="hint">twilio.com → Console → Lookup API (gratuit avec compte).</div></div>
+
+    <div class="fld"><label>Abstract API — clé</label>
+      <input id="s_ak" class="inp" placeholder="xxxxxxxx-xxxx-…">
+      <div class="hint">phonevalidation.abstractapi.com — 100 requêtes/mois gratuites.</div></div>
+
+    <div class="fld"><label>Numverify — clé</label>
+      <input id="s_nk" class="inp" placeholder="access_key">
+      <div class="hint">numverify.com — 100 requêtes/mois gratuites.</div></div>
+
+    <div class="fld"><label>Google CSE — clé API</label>
+      <input id="s_ck" class="inp" placeholder="AIza…"></div>
+    <div class="fld"><label>Google CSE — ID moteur (cx)</label>
+      <input id="s_cx" class="inp" placeholder="a1b2c3…"></div>
+
+    <div style="height:4px"></div>
+    <div class="hint" style="margin:6px 0 12px;border-top:1px solid var(--line);padding-top:10px"><b>Nouvelles sources</b> (ajoutées)</div>
+
+    <div class="fld"><label>Numlookup API — clé</label>
+      <input id="s_nl" class="inp" placeholder="clé numlookupapi.com">
+      <div class="hint">numlookupapi.com — ~250 requêtes/mois gratuites (pays, opérateur, localisation).</div></div>
+
+    <div class="fld"><label>Veriphone.io — clé</label>
+      <input id="s_vp" class="inp" placeholder="clé veriphone.io">
+      <div class="hint">veriphone.io — plan gratuit (validité, type de ligne, région, opérateur).</div></div>
+
+    <div class="fld"><label>OpenCNAM — Account SID</label>
+      <input id="s_oc_sid" class="inp" placeholder="Account SID"></div>
+    <div class="fld"><label>OpenCNAM — Auth Token</label>
+      <input id="s_oc_tok" class="inp" placeholder="Auth Token">
+      <div class="hint">opencnam.com — nom de l'appelant (CNAM). Crédits d'essai gratuits.</div></div>
+
+    <div class="fld"><label>IPQualityScore — clé</label>
+      <input id="s_iqs" class="inp" placeholder="clé ipqualityscore.com">
+      <div class="hint">ipqualityscore.com — 500 requêtes/mois gratuites (score de fraude, spam, opérateur).</div></div>
+
+    <div class="fld"><label>OmkarCloud — clé</label>
+      <input id="s_omk" class="inp" placeholder="clé omkar.cloud">
+      <div class="hint">omkar.cloud — 200 requêtes/mois gratuites (opérateur + type de ligne).</div></div>
+
+    <div class="fld"><label>CallerAPI — clé (agrégateur 5-en-1)</label>
+      <input id="s_cap" class="inp" placeholder="clé callerapi.com">
+      <div class="hint">callerapi.com — UNE clé pour Truecaller + CallApp + ViewCaller + Eyecon + Hiya. Payant (crédits).</div></div>
+
+    <div class="row">
+      <div class="grow"><button class="btn" id="saveSettings">💾 Enregistrer</button></div>
+      <div style="flex:0 0 120px"><button class="btn ghost" id="clearSettings">Effacer</button></div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const $=id=>document.getElementById(id);
+const LS='pif_plus_cfg';
+let cfg={};
+let lastNum='';
+<<<<<<< HEAD
+=======
+let lastResult=null;
+>>>>>>> 407da16 (🚀 v2 : batch, PWA, PDF/JSON, thème, enrichissement, gardien anti-sommeil)
+try{cfg=JSON.parse(localStorage.getItem(LS)||'{}')}catch(e){}
+const COUNTRY_EMOJI={33:'🇫🇷',32:'🇧🇪',41:'🇨🇭',212:'🇲🇦',213:'🇩🇿',216:'🇹🇳',1:'🇺🇸',44:'🇬🇧',49:'🇩🇪',34:'🇪🇸',39:'🇮🇹',351:'🇵🇹',31:'🇳🇱',352:'🇱🇺',90:'🇹🇷'};
+
+/* ---------- liens rapides ---------- */
+function linksFor(num){
+  const raw=num.replace(/[^0-9+]/g,'');
+  const d=raw.replace(/\+/g,'');
+  return [
+    ['G','Google',`https://www.google.com/search?q=${encodeURIComponent('"'+d+'" OR "'+raw+'"')}`],
+    ['B','Bing',`https://www.bing.com/search?q=${encodeURIComponent('"'+d+'"')}`],
+    ['D','DuckDuckGo',`https://duckduckgo.com/?q=${encodeURIComponent('"'+d+'"')}`],
+    ['Y','Yandex',`https://yandex.com/search/?text=${encodeURIComponent('"'+d+'"')}`],
+    ['T','Truecaller (web)',`https://www.truecaller.com/search/${raw.replace('+','')}`],
+    ['E','Eyecon (web)',`https://www.eyecon-app.com/`],
+    ['🧾','Tellows',`https://www.tellows.fr/num/${raw.replace('+','+')}`],
+    ['📇','PagesJaunes inv.',`https://www.pagesjaunes.fr/pagesblanches/recherche?who=${d}`],
+    ['🌍','Annuaire inverse',`https://annuaire-inverse.org/recherche/${d}/`],
+    ['W','WhatsApp',`https://wa.me/${d}`],
+    ['✈️','Telegram',`https://t.me/+${d}`],
+    ['V','Viber (web)',`https://chats.viber.com/`],
+    ['S','Signal (site)',`https://signal.org/`],
+    ['📸','Instagram (recherche)',`https://www.instagram.com/explore/search/keyword/?q=${d}`],
+    ['🔍','Numlookup (web)',`https://www.numlookup.com/${d}`],
+    ['🌐','Numlookup intl.',`https://www.numlookup.com/global/${d}`],
+    ['🧿','Sync.Me (web)',`https://www.sync.me/search/?number=${d}`],
+    ['🕵️','SpyDialer (web)',`https://www.spydialer.com/search/phone/${d}`],
+<<<<<<< HEAD
+=======
+    ['🗺️','Google Maps',`https://www.google.com/maps/search/${encodeURIComponent('"'+d+'"')}`],
+    ['📌','MapQuest',`https://www.mapquest.com/search/results?query=${d}`],
+>>>>>>> 407da16 (🚀 v2 : batch, PWA, PDF/JSON, thème, enrichissement, gardien anti-sommeil)
+  ];
+}
+function renderLinks(num){
+  $('quicklinks').innerHTML=linksFor(num).map(l=>
+    `<a href="${l[2]}" target="_blank" rel="noopener"><em>${l[0]}</em><span>${l[1]}</span>→</a>`).join('');
+}
+
+/* ---------- toast ---------- */
+let toastT;
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),2600)}
+
+/* ---------- sections de résultats ---------- */
+const NAMES={
+  local:'🧭 Local (librairie)',dorks:'🎯 Google Dorks (21)',tellows:'🧾 Tellows (spam)',
+  web_ddg:'🦆 DuckDuckGo',web_bing:'🅱️ Bing',
+  numlookup:'📇 Numlookup',veriphone:'📞 Veriphone',opencnam:'🏷️ OpenCNAM (nom)',
+  iqs:'🛡️ IPQualityScore',omkar:'☁️ OmkarCloud',callerapi:'🔀 CallerAPI (5-en-1)',
+  truecaller:'🔵 Truecaller',eyecon:'👁️ Eyecon',twilio:'🔺 Twilio Lookup',
+  abstract:'📦 Abstract API',numverify:'🔢 Numverify',cse:'🔎 Google CSE'};
+
+function kv(items){
+  return `<div class="kv">${items.filter(i=>i[1]!==undefined&&i[1]!==null&&i[1]!=='').map(i=>
+    `<div class="it"><span>${i[0]}</span><b>${esc(i[1])}</b></div>`).join('')}</div>`;
+}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function rawBlock(o){
+  try{return `<details class="raw"><summary>JSON brut</summary><pre>${esc(JSON.stringify(o,null,1))}</pre></details>`}
+  catch(e){return ''}
+}
+
+function secHTML(name,res){
+  const st=res.ok?'ok':'err';
+  const stLabel=res.ok?'OK':(res.error?'ERREUR':'—');
+  let body='';
+  if(!res.ok){
+    body=`<div class="errbox">⚠️ ${esc(res.error||'erreur inconnue')}</div>`;
+    if((name==='web_ddg'||name==='web_bing')&&lastNum){
+      body+=`<div class="hint" style="margin-top:8px">Le moteur bloque les serveurs de données. Ouvre la recherche dans ton navigateur :</div>
+      <div class="grid2" style="margin-top:8px">
+      <a href="https://www.google.com/search?q=${encodeURIComponent('"'+lastNum.replace(/\+/g,'')+'"')}" target="_blank" rel="noopener"><em>G</em><span>Google</span>→</a>
+      <a href="https://duckduckgo.com/?q=${encodeURIComponent('"'+lastNum.replace(/\+/g,'')+'"')}" target="_blank" rel="noopener"><em>D</em><span>DuckDuckGo</span>→</a>
+      </div>`;
+    }
+  }
+  else{
+    const d=res.data||{};
+    switch(name){
+      case 'local':
+        body=kv([['Numéro E.164',d.e164],['International',d.international],['Local',d.local],
+          ['Pays',`${COUNTRY_EMOJI[d.indicatif]||''} ${d.pays_nom||d.pays||''} (${d.indicatif})`],
+<<<<<<< HEAD
+=======
+          ['Opérateur',d.operateur||'—'],
+>>>>>>> 407da16 (🚀 v2 : batch, PWA, PDF/JSON, thème, enrichissement, gardien anti-sommeil)
+          ['Fuseaux',(d.fuseaux||[]).join(', ')||'—'],
+          ['Valide',d.valide?'✅ oui':'❌ non']]);break;
+      case 'dorks':
+        body=`<div class="hint" style="margin-bottom:6px">${d.nombre||0} requêtes ciblées — clique pour ouvrir dans Google</div>`+
+          (d.dorks||[]).map(x=>`<a class="dork" style="display:block;color:var(--acc);text-decoration:none" href="${esc(x.url)}" target="_blank" rel="noopener">🔗 ${esc(x.site)} — ${esc(x.dork)}</a>`).join('');break;
+      case 'tellows':
+        body=kv([['Score de spam',d.score_spam?d.score_spam+'/100':'—'],['Titre',d.titre],['Lien',d.url]])+rawBlock(d);break;
+      case 'web_ddg':
+      case 'web_bing':
+        body=(d.resultats||[]).map(r=>`<ul class="links"><li><a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.titre||r.url)}</a><span class="sub">${esc(r.url)}</span></li></ul>`).join('')||'<div class="errbox">Aucun résultat</div>';break;
+      case 'truecaller':
+<<<<<<< HEAD
+        body=kv([['Nom',d.nom],['Pays',d.pays],['Opérateur',d.carrier],['Type de ligne',d.type_ligne],['Score spam',d.score_spam!==undefined?d.score_spam:'—'],['Catégorie spam',d.categorie_spam]])+rawBlock(d.brut);break;
+      case 'eyecon':
+        body=(d.resultats||[]).map(r=>`<div class="it" style="display:flex;justify-content:space-between;background:var(--card2);border-radius:9px;padding:8px 10px;margin-bottom:6px"><b>${esc(r.nom||'?')}</b><span style="color:var(--mut);font-size:13px">${esc(r.telephone||'')} ${r.spam?'· 🚨 spam':''}</span></div>`).join('')+rawBlock(d.brut);break;
+=======
+        body='';
+        if(d.url_avatar)body+=`<img src="${esc(d.url_avatar)}" alt="avatar" style="width:72px;height:72px;border-radius:50%;object-fit:cover;border:2px solid var(--line);margin-bottom:10px" onerror="this.remove()">`;
+        body+=kv([['Nom',d.nom],['Pays',d.pays],['Opérateur',d.carrier],['Type de ligne',d.type_ligne],
+          ['Score spam',d.score_spam!==undefined?d.score_spam:'—'],['Catégorie spam',d.categorie_spam],
+          ['Email(s)',(d.emails||[]).join(', ')||'—'],
+          ['Réseaux sociaux',(d.reseaux||[]).map(s=>s.type+' : '+s.id).join(', ')||'—'],
+          ['Vérifié',d.verifie?'✅':'—']])+rawBlock(d.brut);break;
+      case 'eyecon':
+        body=(d.resultats||[]).map(r=>`<div class="it" style="display:flex;justify-content:space-between;background:var(--card2);border-radius:9px;padding:8px 10px;margin-bottom:6px"><b>${esc(r.nom||'?')}</b><span style="color:var(--mut);font-size:13px">${esc(r.telephone||'')} ${r.type_appelant?'· '+esc(r.type_appelant):''} ${r.spam?'· 🚨 spam':''}</span></div>`).join('')+rawBlock(d.brut);break;
+>>>>>>> 407da16 (🚀 v2 : batch, PWA, PDF/JSON, thème, enrichissement, gardien anti-sommeil)
+      case 'twilio':
+        body=kv([['Opérateur',d.carrier],['Type de ligne',d.type_ligne],['Pays',d.pays],['MCC/MNC',d.operateur_mcc&&d.operateur_mnc?`${d.operateur_mcc}/${d.operateur_mnc}`:'—'],['Nom appelant',d.nom_appelant]])+rawBlock(d.brut);break;
+      case 'abstract':
+        body=kv([['Valide',d.valide?'✅':'❌'],['Pays',d.pays],['Opérateur',d.carrier],['Type de ligne',d.type_ligne],['Localisation',d.localisation]])+rawBlock(d.brut);break;
+      case 'numverify':
+        body=kv([['Valide',d.valide?'✅':'❌'],['Pays',d.pays],['Localisation',d.localisation],['Opérateur',d.carrier],['Type de ligne',d.type_ligne]])+rawBlock(d.brut);break;
+      case 'numlookup':
+        body=kv([['Valide',d.valide?'✅':'❌'],['Pays',d.pays],['Localisation',d.localisation],['Opérateur',d.carrier],['Type de ligne',d.type_ligne],['Format intl.',d.format_international],['Format local',d.format_local]])+rawBlock(d.brut);break;
+      case 'veriphone':
+        body=kv([['Valide',d.valide?'✅':'❌'],['Type de ligne',d.type_ligne],['Région',d.region],['Pays',d.pays],['Opérateur',d.carrier],['E.164',d.e164]])+rawBlock(d.brut);break;
+      case 'opencnam':
+        body=kv([['Nom appelant',d.nom||'—'],['Note',d.note]])+rawBlock(d.brut);break;
+      case 'iqs':
+        body=kv([['Valide',d.valide?'✅':'❌'],['Actif',d.actif?'✅':'❌'],['Opérateur',d.carrier],['Type de ligne',d.type_ligne],['Pays',d.pays],['Score fraude',d.score_fraude!==undefined?d.score_fraude+'/100':'—'],['Abus récent',d.abus_recent?'⚠️ oui':'non'],['Spam',d.spam?'⚠️ oui':'non']])+rawBlock(d.brut);break;
+      case 'omkar':
+        body=kv([['Opérateur',d.carrier],['Type de ligne',d.type_ligne],['Valide',d.valide?'✅':'❌'],['Indicatif',d.indicatif]])+rawBlock(d.brut);break;
+      case 'callerapi':
+        body=kv([['🔵 Truecaller — nom',d.truecaller_nom],['🔵 Type',d.truecaller_type],['🔵 Fournisseur',d.truecaller_fournisseur],
+          ['👁️ Eyecon — nom',d.eyecon_nom],
+          ['📞 CallApp — nom',d.callapp_nom],['📞 Site',d.callapp_site],['📞 Catégories',(d.callapp_categories||[]).join(', ')||'—'],
+          ['🏷️ ViewCaller — top',d.viewcaller_top?(d.viewcaller_top.name||'—'):'—'],['🏷️ Occurrences',d.viewcaller_nb_occurrences],
+          ['🟣 Hiya — nom',d.hiya_nom],['🟣 Spam',d.hiya_spam]])+rawBlock(d.brut);break;
+      case 'cse':
+        body=(d.resultats||[]).map(r=>`<ul class="links"><li><a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.titre||r.url)}</a>${r.extrait?`<span class="sub">${esc(r.extrait)}</span>`:''}</li></ul>`).join('')||'<div class="errbox">Aucun résultat CSE</div>';break;
+      default: body=rawBlock(d);
+    }
+  }
+  return `<div class="sec"><div class="h" onclick="this.parentElement.classList.toggle('closed')">
+    <span class="nm">${NAMES[name]||name}</span><span class="st ${st}">${stLabel}</span></div>
+    <div class="b">${body}</div></div>`;
+}
+
+/* ---------- analyse ---------- */
+async function analyse(ev){
+  ev&&ev.preventDefault();
+  const raw=$('num').value.trim();
+  if(!raw){toast('Entre un numéro 📱');return}
+  const cc=$('cc').value;
+  $('go').disabled=true;$('go').innerHTML='<span class="spin"></span> Analyse en cours…';
+  $('status').innerHTML='';
+  const results=$('results');
+  results.innerHTML='';
+  const n=new URLSearchParams();n.set('number',raw);n.set('country',cc);
+  const st=$('status');
+  st.textContent='⏳ Lancement des scanners…';
+    try{
+    const r=await fetch('/api/scan',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({number:raw,country:cc,config:cfg,engines:[]})});
+    const j=await r.json();
+    if(!j.ok){st.textContent='';toast('❌ '+j.error);return}
+<<<<<<< HEAD
+    lastNum=j.number;
+    $('status').textContent=`✅ ${j.number} — ${Object.keys(j.scanners).length} scanners`;
+=======
+    lastNum=j.number;lastResult=j;
+    $('status').textContent=`✅ ${j.number} — ${Object.keys(j.scanners).length} scanners`;
+    $('actionsBar').style.display='';
+>>>>>>> 407da16 (🚀 v2 : batch, PWA, PDF/JSON, thème, enrichissement, gardien anti-sommeil)
+    results.innerHTML=`<div class="card"><div class="num">${esc(j.number)}</div><div class="subnum">Scanners locaux sans clé · lancement en parallèle</div>
+      <div class="grid2">
+      <button class="btn small ghost" onclick="rerun('local')">⟳ Relancer local</button>
+      <button class="btn small ghost" onclick="copytxt()">📋 Copier tout</button>
+      </div></div>`;
+    for(const [k,v] of Object.entries(j.scanners)){
+      const el=document.createElement('div');el.innerHTML=secHTML(k,v);results.appendChild(el);
+    }
+    saveHist(raw);
+  }catch(e){
+    st.textContent='';toast('❌ Erreur réseau : '+e.message);
+  }finally{
+    $('go').disabled=false;$('go').innerHTML='🔍 Analyser le numéro';
+  }
+}
+
+async function rerun(name){
+  const raw=$('num').value.trim();if(!raw)return;
+  toast('Relance '+name+'…');
+  const r=await fetch('/api/scanner/'+name,{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({number:raw,country:$('cc').value,config:cfg})});
+  const j=await r.json();
+  if(!j.ok){toast(j.error||'Erreur');return}
+  const el=document.createElement('div');el.innerHTML=secHTML(name,j.result);
+  const sec=document.querySelector(`#results .sec .h .nm`);
+  if(sec){
+    const old=sec.closest('.sec');
+    // insérer après la section cible
+    const target=[...document.querySelectorAll('#results .sec')].find(s=>s.querySelector('.nm').textContent.startsWith(NAMES[name]));
+    if(target)target.replaceWith(el); else old.parentElement.insertBefore(el,old.nextSibling);
+  } else {
+    document.getElementById('results').appendChild(el);
+  }
+  toast('✔ '+name+' actualisé');
+}
+function copytxt(){
+  const t=document.getElementById('results').innerText;
+  navigator.clipboard&&navigator.clipboard.writeText(t).then(()=>toast('📋 Copié !')).catch(()=>toast('Copie impossible'));
+}
+
+<<<<<<< HEAD
+=======
+/* ---------- PDF / JSON / déplier ---------- */
+function printReport(){
+  // force tout déplier pour un rapport complet
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('closed'));
+  window.print();
+}
+function exportJSON(){
+  if(!lastResult){toast('Fais d\'abord une analyse');return}
+  const blob=new Blob([JSON.stringify(lastResult,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=(lastResult.number||'rapport').replace(/[^0-9+]/g,'')+'.json';
+  a.click();URL.revokeObjectURL(a.href);
+  toast('⬇️ JSON téléchargé');
+}
+function toggleAll(){
+  const secs=[...document.querySelectorAll('#results .sec')];
+  const anyOpen=secs.some(s=>!s.classList.contains('closed'));
+  secs.forEach(s=>s.classList.toggle('closed',anyOpen));
+}
+
+/* ---------- thème clair/sombre ---------- */
+$('themeBtn').onclick=()=>{
+  const light=document.body.classList.toggle('light');
+  $('themeBtn').textContent=light?'☀️':'🌙';
+  localStorage.setItem('pif_theme',light?'light':'dark');
+};
+if(localStorage.getItem('pif_theme')==='light'){$('themeBtn').click()}
+
+/* ---------- analyse en lot ---------- */
+$('batchToggle').onclick=()=>{
+  const box=$('batchBox');
+  box.style.display=box.style.display==='none'?'block':'none';
+  if(box.style.display==='block')$('batchList').focus();
+};
+$('batchGo').onclick=async()=>{
+  const nums=$('batchList').value.split('\n').map(s=>s.trim()).filter(Boolean);
+  if(!nums.length){toast('Colle au moins un numéro');return}
+  $('batchGo').disabled=true;$('batchGo').innerHTML='<span class="spin"></span> Analyse…';
+  $('batchStatus').textContent=`⏳ ${nums.length} numéro(s) en cours…`;
+  try{
+    const r=await fetch('/api/scan/batch',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({numbers:nums,country:$('cc').value,config:cfg})});
+    const j=await r.json();
+    if(!j.ok){$('batchStatus').textContent='❌ '+j.error;return}
+    $('batchStatus').textContent=`✅ ${j.results.length} résultat(s)`;
+    const rows=j.results.map(x=>{
+      if(!x.ok)return `<tr><td>${esc(x.input)}</td><td colspan="4" style="color:var(--ko)">${esc(x.error)}</td></tr>`;
+      const l=x.local&&x.local.ok?x.local.data:null;
+      const tc=x.truecaller&&x.truecaller.ok?x.truecaller.data:null;
+      const pays=l?`${COUNTRY_EMOJI[l.indicatif]||''} ${l.pays_nom||l.pays||''}`:'—';
+      return `<tr>
+        <td><b>${esc(x.number)}</b></td>
+        <td>${pays}</td>
+        <td>${l?(l.valide?'✅':'❌'):'—'}</td>
+        <td>${tc&&tc.nom?esc(tc.nom):'—'}</td>
+        <td><button class="btn small ghost" onclick="use('${esc(x.number)}')">Détail</button></td>
+      </tr>`;
+    }).join('');
+    $('batchResults').innerHTML=`<table style="width:100%;border-collapse:collapse;font-size:13.5px;margin-top:10px">
+      <tr style="color:var(--mut);font-size:12px;text-align:left">
+        <th style="padding:6px">Numéro</th><th>Pays</th><th>Valide</th><th>Nom (TC)</th><th></th></tr>
+      ${rows}</table>`;
+    $('batchCsv').disabled=false;
+    window._batch=j;
+  }catch(e){$('batchStatus').textContent='❌ '+e.message}
+  finally{$('batchGo').disabled=false;$('batchGo').innerHTML='🔍 Analyser le lot'}
+};
+$('batchCsv').onclick=()=>{
+  if(!window._batch)return;
+  const lines=[['Numéro','Pays','Valide','Nom Truecaller']];
+  for(const x of window._batch.results){
+    if(!x.ok){lines.push([x.input,'','','']);continue}
+    const l=x.local&&x.local.ok?x.local.data:null;
+    const tc=x.truecaller&&x.truecaller.ok?x.truecaller.data:null;
+    lines.push([x.number,l?((l.pays_nom||l.pays)||''):'',l?(l.valide?'oui':''):'',tc?tc.nom||'':'']);
+  }
+  const csv=lines.map(r=>r.map(c=>'"'+String(c||'').replace(/"/g,'""')+'"').join(';')).join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}));
+  a.download='lot-phoneinfoga.csv';a.click();URL.revokeObjectURL(a.href);
+  toast('📊 CSV téléchargé');
+};
+
+/* ---------- service worker (PWA / hors-ligne) ---------- */
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('/sw.js').catch(()=>{});
+}
+
+>>>>>>> 407da16 (🚀 v2 : batch, PWA, PDF/JSON, thème, enrichissement, gardien anti-sommeil)
+/* ---------- historique ---------- */
+function saveHist(n){
+  let h=[];try{h=JSON.parse(localStorage.getItem('pif_hist')||'[]')}catch(e){}
+  h=[n,...h.filter(x=>x!==n)].slice(0,8);localStorage.setItem('pif_hist',JSON.stringify(h));renderHist();
+}
+function renderHist(){
+  let h=[];try{h=JSON.parse(localStorage.getItem('pif_hist')||'[]')}catch(e){}
+  $('hist').innerHTML=h.map(x=>`<span class="chip" onclick="use('${esc(x)}')">${esc(x)}</span>`).join('');
+}
+function use(n){$('num').value=n;analyse()}
+
+/* ---------- settings ---------- */
+function fillSettings(){
+  $('s_tc').value=cfg.truecallerToken||'';$('s_ea').value=cfg.eyeconAuth||'';
+  $('s_eav').value=cfg.eyeconAuthV||'';$('s_eac').value=cfg.eyeconAuthC||'';
+  $('s_ts').value=cfg.twilioSid||'';$('s_tt').value=cfg.twilioToken||'';
+  $('s_ak').value=cfg.abstractKey||'';$('s_nk').value=cfg.numverifyKey||'';
+  $('s_ck').value=cfg.cseKey||'';$('s_cx').value=cfg.cseCx||'';
+  $('s_nl').value=cfg.numlookupKey||'';$('s_vp').value=cfg.veriphoneKey||'';
+  $('s_oc_sid').value=cfg.opencnamSid||'';$('s_oc_tok').value=cfg.opencnamToken||'';
+  $('s_iqs').value=cfg.iqsKey||'';$('s_omk').value=cfg.omkarKey||'';
+  $('s_cap').value=cfg.callerapiKey||'';
+}
+$('openSettings').onclick=()=>{fillSettings();$('settingsModal').classList.add('open')};
+$('closeSettings').onclick=()=>$('settingsModal').classList.remove('open');
+$('settingsModal').onclick=e=>{if(e.target===$('settingsModal'))$('settingsModal').classList.remove('open')};
+$('saveSettings').onclick=()=>{
+  cfg={truecallerToken:$('s_tc').value.trim(),eyeconAuth:$('s_ea').value.trim(),eyeconAuthV:$('s_eav').value.trim(),
+    eyeconAuthC:$('s_eac').value.trim(),twilioSid:$('s_ts').value.trim(),twilioToken:$('s_tt').value.trim(),
+    abstractKey:$('s_ak').value.trim(),numverifyKey:$('s_nk').value.trim(),cseKey:$('s_ck').value.trim(),cseCx:$('s_cx').value.trim(),
+    numlookupKey:$('s_nl').value.trim(),veriphoneKey:$('s_vp').value.trim(),
+    opencnamSid:$('s_oc_sid').value.trim(),opencnamToken:$('s_oc_tok').value.trim(),
+    iqsKey:$('s_iqs').value.trim(),omkarKey:$('s_omk').value.trim(),callerapiKey:$('s_cap').value.trim()};
+  localStorage.setItem(LS,JSON.stringify(cfg));
+  $('settingsModal').classList.remove('open');
+  toast('💾 Clés enregistrées (navigateur)');
+};
+$('clearSettings').onclick=()=>{cfg={};localStorage.removeItem(LS);fillSettings();toast('🗑️ Clés effacées')};
+
+/* ---------- auto-token Truecaller (OTP SMS) ---------- */
+let tcPhone='';
+$('openSettings').onclick=()=>{fillSettings();$('settingsModal').classList.add('open');
+  if(!$('tc_num').value && $('num').value.trim()){$('tc_num').value=$('num').value.trim()}
+  $('tc_state').textContent='Truecaller t\'envoie un SMS avec un code → l\'app crée le token automatiquement. ⚠️ Numéro jetable conseillé (risque de ban).';
+  $('tc_state').style.color='var(--mut)';
+};
+$('tc_send').onclick=async()=>{
+  const n=$('tc_num').value.trim();
+  if(!n){toast('Entre ton numéro 📱');return}
+  $('tc_send').disabled=true;$('tc_send').innerHTML='<span class="spin"></span>';
+  $('tc_state').textContent='Demande du code SMS…';$('tc_state').style.color='var(--warn)';
+  try{
+    const r=await fetch('/api/tc/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({number:n})});
+    const j=await r.json();
+    if(!j.ok){$('tc_state').textContent='❌ '+j.error;$('tc_state').style.color='var(--ko)';return}
+    tcPhone=n.replace(/[^0-9+]/g,'');
+    $('tc_state').textContent='✅ Code SMS envoyé à '+tcPhone+' — saisis-le ci-dessous.';
+    $('tc_state').style.color='var(--ok)';
+    $('tc_code').disabled=false;$('tc_ok').disabled=false;$('tc_code').focus();
+  }catch(e){$('tc_state').textContent='❌ Erreur réseau : '+e.message;$('tc_state').style.color='var(--ko)'}
+  finally{$('tc_send').disabled=false;$('tc_send').innerHTML='📩 Envoyer'}
+};
+$('tc_ok').onclick=async()=>{
+  const code=$('tc_code').value.trim();
+  if(!code||!tcPhone){toast('Code manquant');return}
+  $('tc_ok').disabled=true;$('tc_ok').innerHTML='<span class="spin"></span>';
+  $('tc_state').textContent='Vérification du code…';$('tc_state').style.color='var(--warn)';
+  try{
+    const r=await fetch('/api/tc/verify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({number:tcPhone,code})});
+    const j=await r.json();
+    if(!j.ok){$('tc_state').textContent='❌ '+j.error;$('tc_state').style.color='var(--ko)';return}
+    cfg.truecallerToken='Bearer '+j.installationId;
+    localStorage.setItem(LS,JSON.stringify(cfg));
+    $('s_tc').value=cfg.truecallerToken;
+    $('tc_state').textContent='🎉 Token Truecaller activé et enregistré ! Tu peux fermer cette fenêtre.';
+    $('tc_state').style.color='var(--ok)';
+    toast('🔵 Token Truecaller enregistré !');
+  }catch(e){$('tc_state').textContent='❌ Erreur réseau : '+e.message;$('tc_state').style.color='var(--ko)'}
+  finally{$('tc_ok').disabled=false;$('tc_ok').innerHTML='✅ Activer'}
+};
+
+/* ---------- remplissage auto par collage d'en-têtes ---------- */
+$('paste_go').onclick=async()=>{
+  const t=$('paste_headers').value;
+  if(!t.trim()){toast('Colle d\'abord le texte 📋');return}
+  $('paste_go').disabled=true;$('paste_state').textContent='Analyse…';$('paste_state').style.color='var(--warn)';
+  try{
+    const r=await fetch('/api/parse_headers',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:t})});
+    const j=await r.json();
+    if(!j.ok){$('paste_state').textContent='❌ '+j.error;$('paste_state').style.color='var(--ko)';return}
+    const f=j.found||{};
+    const map={truecallerToken:'s_tc',eyeconAuth:'s_ea',eyeconAuthV:'s_eav',eyeconAuthC:'s_eac',twilioSid:'s_ts',twilioToken:'s_tt'};
+    let n=0;
+    for(const[k,id]of Object.entries(map)){if(f[k]!==undefined){$(id).value=f[k];n++}}
+    $('paste_state').textContent='✅ '+n+' clé(s) détectée(s) et remplie(s) — clique « 💾 Enregistrer » pour valider.';
+    $('paste_state').style.color='var(--ok)';
+    toast('🔁 '+n+' clé(s) remplie(s) !');
+  }catch(e){$('paste_state').textContent='❌ Erreur : '+e.message;$('paste_state').style.color='var(--ko)'}
+  finally{$('paste_go').disabled=false}
+};
+
+/* ---------- export / import des clés ---------- */
+$('keys_export').onclick=()=>{
+  const clean={};for(const[k,v]of Object.entries(cfg)){if(v)clean[k]=v}
+  const s=JSON.stringify(clean);
+  if(navigator.clipboard){navigator.clipboard.writeText(s).then(()=>toast('📤 Clés copiées (JSON)')).catch(()=>toast('Copie impossible'))}
+  else{prompt('Copie ce JSON :',s)}
+};
+$('keys_import').onclick=()=>{
+  const s=prompt('Colle le JSON des clés (exporté depuis un autre appareil) :');
+  if(!s)return;
+  try{
+    const j=JSON.parse(s);
+    Object.assign(cfg,j);localStorage.setItem(LS,JSON.stringify(cfg));fillSettings();
+    toast('📥 Clés importées !');
+  }catch(e){toast('❌ JSON invalide')}
+};
+
+/* ---------- init ---------- */
+$('go').onclick=analyse;
+$('num').addEventListener('keydown',e=>{if(e.key==='Enter')analyse()});
+$('num').addEventListener('input',()=>{
+  const v=$('num').value.trim();
+  if(v.replace(/[^0-9+]/g,'').length>=6){renderLinks(v)}
+  else {$('quicklinks').innerHTML=''}
+});
+renderHist();
+if(!$('quicklinks').innerHTML){
+  $('quicklinks').innerHTML=`<a style="grid-column:1/-1;justify-content:center;color:var(--mut);font-size:13px">Entre un numéro pour voir les liens directs (WhatsApp, Truecaller web, annuaires…)</a>`;
+}
+</script>
+</body>
+</html>

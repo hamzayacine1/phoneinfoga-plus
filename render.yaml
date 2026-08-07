@@ -1,0 +1,12 @@
+# Render Blueprint — PhoneInfoga+ (URL permanent, gratuit)
+# 1. Va sur https://render.com → New + → Blueprint
+# 2. Choisis ton repo GitHub → Apply
+# 3. Ton URL : https://phoneinfoga-plus.onrender.com
+services:
+  - type: web
+    name: phoneinfoga-plus
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --timeout 120
+    healthCheckPath: /api/health
